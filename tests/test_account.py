@@ -79,3 +79,17 @@ class TestAccount(TestCase):
         ts_code = confirmation.split('-')[0]
 
         self.assertEqual(ts_code, 'X')
+
+    def test_pay_interest_to_account(self):
+        """Test pay interest to the account's balance.'"""
+
+        self.account.deposit(100)
+
+        expected = (self.account.interest_rate * self.account.balance +
+                    self.account.balance)
+
+        confirmation = self.account.pay_interest()
+        ts_code = confirmation.split('-')[0]
+
+        self.assertEqual(self.account.balance, expected)
+        self.assertEqual(ts_code, 'I')

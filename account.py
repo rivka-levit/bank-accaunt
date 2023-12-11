@@ -99,9 +99,16 @@ class Account:
         try:
             self.balance -= amount
             return self.generate_conf_number('W', datetime.now())
-        except ValueError as err:
-            print(err)
+        except ValueError:
             return self.generate_conf_number('X', datetime.now())
+
+    def pay_interest(self):
+        """Deposit interest on the balance."""
+
+        interest = self.balance * self.interest_rate
+        self.deposit(interest)
+
+        return self.generate_conf_number('I', datetime.now())
 
     @staticmethod
     def get_transaction_id():
