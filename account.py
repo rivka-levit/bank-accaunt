@@ -81,7 +81,21 @@ class Account:
         """Generate confirmation number for every transaction."""
 
         dt_stamp = dt.strftime('%Y%m%d%H%M%S')
-        ts_id['id'] += 1
-        id_num = ts_id['id']
+        id_num = self.get_transaction_id()
 
         return f'{code}-{self.account_number}-{dt_stamp}-{id_num}'
+
+    def deposit(self, amount: float) -> str:
+        """Deposit amount on the balance."""
+
+        self._balance += amount
+        dt = datetime.now()
+
+        return self.generate_conf_number('D', dt)
+
+    @staticmethod
+    def get_transaction_id():
+        """Get transaction id incrementing it by 1."""
+
+        ts_id['id'] += 1
+        return ts_id['id']
