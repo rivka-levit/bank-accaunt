@@ -93,6 +93,16 @@ class Account:
 
         return self.generate_conf_number('D', dt)
 
+    def withdraw(self, amount: float) -> str:
+        """Withdraw amount from the balance."""
+
+        try:
+            self.balance -= amount
+            return self.generate_conf_number('W', datetime.now())
+        except ValueError as err:
+            print(err)
+            return self.generate_conf_number('X', datetime.now())
+
     @staticmethod
     def get_transaction_id():
         """Get transaction id incrementing it by 1."""

@@ -62,3 +62,20 @@ class TestAccount(TestCase):
         self.account.deposit(amount)
 
         self.assertEqual(self.account.balance, current_balance + amount)
+
+    def test_withdrawal_from_account_success(self):
+        """Test withdrawal amount from the account's balance."""
+
+        self.account.deposit(100)
+        self.account.withdraw(50)
+
+        self.assertEqual(self.account.balance, 50)
+
+    def test_withdrawal_from_account_declined(self):
+        """Test withdrawal declined."""
+
+        self.account.deposit(50)
+        confirmation = self.account.withdraw(100)
+        ts_code = confirmation.split('-')[0]
+
+        self.assertEqual(ts_code, 'X')
