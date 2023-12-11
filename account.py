@@ -2,7 +2,12 @@
 Bank Account class
 """
 
+from datetime import datetime
+
 from time_zone import TimeZone
+
+
+ts_id = {'id': 0}
 
 
 class Account:
@@ -71,3 +76,12 @@ class Account:
     @property
     def interest_rate(self):
         return self._interest_rate
+
+    def generate_conf_number(self, code: str, dt: datetime) -> str:
+        """Generate confirmation number for every transaction."""
+
+        dt_stamp = dt.strftime('%Y%m%d%H%M%S')
+        ts_id['id'] += 1
+        id_num = ts_id['id']
+
+        return f'{code}-{self.account_number}-{dt_stamp}-{id_num}'
