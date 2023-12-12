@@ -11,6 +11,7 @@ from transactions import Transaction
 
 
 ts_id = {'id': 0}
+transactions = dict()
 
 
 class Account:
@@ -85,6 +86,12 @@ class Account:
 
         dt_stamp = dt.strftime('%Y%m%d%H%M%S')
         id_num = self.get_transaction_id()
+        transactions[id_num] = {
+            'id_num': id_num,
+            'code': code,
+            'acc_num': self.account_number,
+            'dt': dt
+        }
 
         return f'{code}-{self.account_number}-{dt_stamp}-{id_num}'
 
@@ -92,7 +99,7 @@ class Account:
         """Deposit amount on the balance."""
 
         self._balance += amount
-        dt = datetime.now()
+        dt = datetime.now(tz=pytz.utc)
 
         return self.generate_conf_number('D', dt)
 
@@ -101,9 +108,9 @@ class Account:
 
         try:
             self.balance -= amount
-            return self.generate_conf_number('W', datetime.now())
+            return self.generate_conf_number('W', datetime.now(tz=pytz.utc))
         except ValueError:
-            return self.generate_conf_number('X', datetime.now())
+            return self.generate_conf_number('X', datetime.now(tz=pytz.utc))
 
     def pay_interest(self):
         """Deposit interest on the balance."""
@@ -121,12 +128,9 @@ class Account:
         return ts_id['id']
 
     @staticmethod
-    def get_transaction(confirmation: str, tz) -> Transaction:
+    def get_transaction(confirmation: str, tz: str) -> Transaction:
         """Return transaction by confirmation number."""
 
-        code, acc, dt, id_num = confirmation.split('-')
-        y, m, d, h, mt, sec = map(int, [dt[:4], dt[4:6], dt[6:8], dt[8:10],
-                                        dt[10:12], dt[12:]])
-        dt = datetime(y, m, d, h, mt, sec, tzinfo=pytz.utc)
+        id_num = int(confirmation.split('-')[-1])
 
-        return Transaction(code, acc, dt, id_num, tz)
+        return Transaction(**transactions[id_num], tz=tz)

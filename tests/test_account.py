@@ -98,18 +98,21 @@ class TestAccount(TestCase):
     def test_get_transaction_method(self):
         """Test the get_transaction method returns a valid transaction."""
 
-        dt = datetime(2023, 12, 10, 12, 0, 0, tzinfo=pytz.utc)
         dt_format = '%Y-%m-%d %H:%M:%S (%Z)'
-        confirmation = (f'D-{self.account.account_number}-'
-                        f'{dt.strftime('%Y%m%d%H%M%S')}-124')
+        confirmation = self.account.deposit(100)
+        id_num = int(confirmation.split('-')[-1])
+        dt = confirmation.split('-')[-2]
+        y, m, d, h, mt, sec = map(int, [dt[:4], dt[4:6], dt[6:8], dt[8:10],
+                                        dt[10:12], dt[12:]])
+        dt_obj = datetime(y, m, d, h, mt, sec, tzinfo=pytz.utc)
 
         tsn = self.account.get_transaction(confirmation, self.account.tz.tz)
 
         self.assertEqual(tsn.account_number, self.account.account_number)
         self.assertEqual(tsn.transaction_code, 'D')
-        self.assertEqual(tsn.transaction_id, '124')
+        self.assertEqual(tsn.transaction_id, id_num)
         preferred_tz = pytz.timezone(self.account.tz.tz)
-        self.assertEqual(tsn.time, dt.astimezone(preferred_tz).
+        self.assertEqual(tsn.time, dt_obj.astimezone(preferred_tz).
                          strftime(dt_format))
-        self.assertEqual(tsn.time_utc, dt.strftime(dt_format))
+        self.assertEqual(tsn.time_utc, dt_obj.strftime(dt_format))
 
