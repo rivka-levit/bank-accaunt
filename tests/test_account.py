@@ -6,6 +6,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from datetime import datetime
+import pytz
 
 from account import Account
 from time_zone import TimeZone
@@ -37,11 +38,11 @@ class TestAccount(TestCase):
         self.assertEqual(self.account.interest_rate, 0.005)
 
     @patch('account.Account.get_transaction_id')
-    def test_generate_confirmation_number(self, mocked_id):
+    def test_generate_confirmation_number(self, mocked_get_transaction_id):
         """Test generating confirmation number of transaction."""
 
         dt = datetime.now()
-        mocked_id.return_value = 5
+        mocked_get_transaction_id.return_value = 5
         payload = {
             'code': 'D',
             'dt': dt
@@ -93,3 +94,22 @@ class TestAccount(TestCase):
 
         self.assertEqual(self.account.balance, expected)
         self.assertEqual(ts_code, 'I')
+
+    def test_get_transaction_method(self):
+        """Test the get_transaction method returns a valid transaction."""
+
+        dt = datetime(2023, 12, 10, 12, 0, 0, tzinfo=pytz.utc)
+        dt_format = '%Y-%m-%d %H:%M:%S (%Z)'
+        confirmation = (f'D-{self.account.account_number}-'
+                        f'{dt.strftime('%Y%m%d%H%M%S')}-124')
+
+        tsn = self.account.get_transaction(confirmation, self.account.tz.tz)
+
+        self.assertEqual(tsn.account_number, self.account.account_number)
+        self.assertEqual(tsn.transaction_code, 'D')
+        self.assertEqual(tsn.transaction_id, '124')
+        preferred_tz = pytz.timezone(self.account.tz.tz)
+        self.assertEqual(tsn.time, dt.astimezone(preferred_tz).
+                         strftime(dt_format))
+        self.assertEqual(tsn.time_utc, dt.strftime(dt_format))
+

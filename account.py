@@ -4,7 +4,10 @@ Bank Account class
 
 from datetime import datetime
 
+import pytz
+
 from time_zone import TimeZone
+from transactions import Transaction
 
 
 ts_id = {'id': 0}
@@ -116,3 +119,14 @@ class Account:
 
         ts_id['id'] += 1
         return ts_id['id']
+
+    @staticmethod
+    def get_transaction(confirmation: str, tz) -> Transaction:
+        """Return transaction by confirmation number."""
+
+        code, acc, dt, id_num = confirmation.split('-')
+        y, m, d, h, mt, sec = map(int, [dt[:4], dt[4:6], dt[6:8], dt[8:10],
+                                        dt[10:12], dt[12:]])
+        dt = datetime(y, m, d, h, mt, sec, tzinfo=pytz.utc)
+
+        return Transaction(code, acc, dt, id_num, tz)
