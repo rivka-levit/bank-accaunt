@@ -5,30 +5,36 @@ from datetime import datetime
 class TimeZone:
     """Time zone information."""
 
-    _tz = pytz.utc
+    _name = None
 
-    def __init__(self, zone: str = None):
-        if zone is not None:
-            self.tz = zone
+    def __init__(self, zone: str):
+        self.name = zone
 
     @property
-    def tz(self):
-        return self._tz.zone
+    def name(self):
+        return self._name
 
-    @tz.setter
-    def tz(self, zone):
+    @name.setter
+    def name(self, zone):
+        if not isinstance(zone, str):
+            raise ValueError('Timezone must be a string.')
+        if len(str(zone).strip()) == 0:
+            raise ValueError('Timezone name cannot be empty.')
         if zone not in pytz.all_timezones:
-            raise ValueError('No such a time zone.')
-        self._tz = pytz.timezone(zone)
+            raise ValueError('No such a timezone.')
+        self._name = zone
 
     @property
     def offset(self):
-        return self._tz.localize(datetime.now()).strftime('%z')
+        dt = datetime.now(tz=pytz.timezone(self.name))
+        return dt.utcoffset()
 
 
 if __name__ == '__main__':
     # tz = TimeZone('Asia/Jerusalem')
-    tz = pytz.timezone('Asia/Jerusalem')
-    print(pytz.all_timezones)
+    tz = TimeZone('Asia/Jerusalem')
+    dt_now = datetime.utcnow()
+    print(dt_now)
+    print(dt_now + tz.offset)
     # print(tz.localize(datetime.now()).strftime('%Z %z'))
     # print(tz.utcoffset(datetime.now()))

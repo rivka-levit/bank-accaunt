@@ -2,7 +2,7 @@
 Tests for time zone class
 """
 from unittest import TestCase
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from time_zone import TimeZone
@@ -11,20 +11,20 @@ from time_zone import TimeZone
 class TestTimeZone(TestCase):
     """Tests for TimeZone class."""
 
-    def setUp(self):
-        self.time_zone = TimeZone()
-
     def test_default_settings(self):
         """Test the default attributes of the TimeZone class."""
 
-        self.assertEqual(self.time_zone.tz, pytz.utc.zone)
-        self.assertEqual(self.time_zone.offset, '+0000')
+        zone_name = 'UTC'
+        tz = TimeZone(zone_name)
+        expected_offset = timedelta(hours=0, minutes=0, seconds=0)
+
+        self.assertEqual(tz.name, zone_name)
+        self.assertEqual(tz.offset, expected_offset)
 
     def test_change_timezone(self):
         """Test setting another timezone."""
 
-        self.time_zone.tz = 'Asia/Jerusalem'
-        expected_offset = (pytz.timezone('Asia/Jerusalem').
-                           localize(datetime.now()).
-                           strftime('%z'))
-        self.assertEqual(self.time_zone.offset, expected_offset)
+        tz = TimeZone('Asia/Jerusalem')
+        expected_offset = datetime.now(pytz.timezone(tz.name)).utcoffset()
+
+        self.assertEqual(tz.offset, expected_offset)

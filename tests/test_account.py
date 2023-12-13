@@ -98,7 +98,7 @@ class TestAccount(TestCase):
     def test_get_transaction_method(self):
         """Test the get_transaction method returns a valid transaction."""
 
-        preferred_tz = pytz.timezone(self.account.tz.tz)
+        preferred_tz = pytz.timezone(self.account.tz.name)
         dt_format = '%Y-%m-%d %H:%M:%S (%Z)'
 
         confirmation = self.account.deposit(100)
@@ -114,7 +114,7 @@ class TestAccount(TestCase):
         expected_time_utc = dt_obj.strftime(dt_format)
         expected_time = dt_obj.astimezone(preferred_tz).strftime(dt_format)
 
-        tsn = self.account.get_transaction(confirmation, self.account.tz.tz)
+        tsn = self.account.get_transaction(confirmation, self.account.tz.name)
 
         self.assertEqual(tsn.account_number, self.account.account_number)
         self.assertEqual(tsn.transaction_code, 'D')
