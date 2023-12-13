@@ -37,12 +37,12 @@ class TestAccount(TestCase):
         self.assertEqual(self.account.balance, 0)
         self.assertEqual(self.account.interest_rate, 0.005)
 
-    @patch('account.Account.get_transaction_id')
-    def test_generate_confirmation_number(self, mocked_get_transaction_id):
+    @patch('account.next')
+    def test_generate_confirmation_number(self, mocked_transaction_counter):
         """Test generating confirmation number of transaction."""
 
         dt = datetime.now()
-        mocked_get_transaction_id.return_value = 5
+        mocked_transaction_counter.return_value = 5
         payload = {
             'code': 'D',
             'dt': dt

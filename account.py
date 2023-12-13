@@ -5,36 +5,34 @@ Bank Account class
 from datetime import datetime
 
 import pytz
+import itertools
 
 from time_zone import TimeZone
 from transactions import Transaction
 
-
-ts_id = {'id': 0}
 transactions = dict()
 
 
 class Account:
     """Account object"""
 
-    _balance = 0
-    _interest_rate = 0.005
-    _first_name = None
-    _last_name = None
+    transaction_counter = itertools.count(1)
 
     def __init__(self,
                  number: str,
                  first_name: str,
                  last_name: str,
-                 zone: str = None) -> None:
-        if zone is None:
-            self.tz = TimeZone()
-        else:
-            self.tz = TimeZone(zone=zone)
+                 zone: str) -> None:
+
+        self.tz = TimeZone(zone=zone)
         self.account_number = number
+        self._first_name = None
+        self._last_name = None
         self.first_name = first_name
         self.last_name = last_name
         self._full_name = None
+        self._balance = 0
+        self._interest_rate = 0.005
 
     @property
     def first_name(self):
@@ -85,7 +83,7 @@ class Account:
         """Generate confirmation number for every transaction."""
 
         dt_stamp = dt.strftime('%Y%m%d%H%M%S')
-        id_num = self.get_transaction_id()
+        id_num = next(Account.transaction_counter)
         transactions[id_num] = {
             'id_num': id_num,
             'code': code,
@@ -119,13 +117,6 @@ class Account:
         self.deposit(interest)
 
         return self.generate_conf_number('I', datetime.now())
-
-    @staticmethod
-    def get_transaction_id():
-        """Get transaction id incrementing it by 1."""
-
-        ts_id['id'] += 1
-        return ts_id['id']
 
     @staticmethod
     def get_transaction(confirmation: str, tz: str) -> Transaction:

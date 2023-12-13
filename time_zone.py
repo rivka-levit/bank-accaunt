@@ -5,11 +5,10 @@ from datetime import datetime
 class TimeZone:
     """Time zone information."""
 
-    _name = None
-    _offset_hours = None
-    _offset_minutes = None
-
     def __init__(self, zone: str):
+        self._name = None
+        self._offset_hours = None
+        self._offset_minutes = None
         self.name = zone
         self._offset = self.offset
 
