@@ -23,6 +23,7 @@ class Account:
                  number: str,
                  first_name: str,
                  last_name: str,
+                 initial_balance: float = 0,
                  zone: str = None) -> None:
 
         if zone is not None:
@@ -33,7 +34,7 @@ class Account:
         self.first_name = first_name
         self.last_name = last_name
         self._full_name = None
-        self._balance = 0
+        self._balance = initial_balance
         self._interest_rate = 0.005
 
     @property
@@ -78,13 +79,6 @@ class Account:
     def balance(self):
         return self._balance
 
-    @balance.setter
-    def balance(self, new_balance: float) -> None:
-        if new_balance >= 0:
-            self._balance = new_balance
-        else:
-            raise ValueError('Not enough money on the account')
-
     @property
     def interest_rate(self):
         return self._interest_rate
@@ -114,16 +108,18 @@ class Account:
     def withdraw(self, amount: float) -> str:
         """Withdraw amount from the balance."""
 
-        try:
-            self.balance -= amount
-            return self.generate_conf_number('W', datetime.now(tz=pytz.utc))
-        except ValueError:
+        new_balance = self._balance - amount
+
+        if new_balance < 0:
             return self.generate_conf_number('X', datetime.now(tz=pytz.utc))
+
+        self._balance -= amount
+        return self.generate_conf_number('W', datetime.now(tz=pytz.utc))
 
     def pay_interest(self):
         """Deposit interest on the balance."""
 
-        interest = self.balance * self.interest_rate
+        interest = self._balance * self.interest_rate
         self.deposit(interest)
 
         return self.generate_conf_number('I', datetime.now())
