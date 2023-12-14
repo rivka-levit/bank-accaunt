@@ -25,7 +25,7 @@ class Account:
                  zone: str) -> None:
 
         self.tz = TimeZone(zone=zone)
-        self.account_number = number
+        self._account_number = number
         self._first_name = None
         self._last_name = None
         self.first_name = first_name
@@ -35,28 +35,26 @@ class Account:
         self._interest_rate = 0.005
 
     @property
+    def account_number(self):
+        return self._account_number
+
+    @property
     def first_name(self):
         return self._first_name
 
     @first_name.setter
-    def first_name(self, first_name: str) -> None:
-        if isinstance(first_name, str):
-            self._first_name = first_name
-            self._full_name = None
-        else:
-            raise ValueError('First name must be a string')
+    def first_name(self, name: str) -> None:
+        self._first_name = Account.validate_name(name, 'first name')
+        self._full_name = None
 
     @property
     def last_name(self):
         return self._last_name
 
     @last_name.setter
-    def last_name(self, last_name: str) -> None:
-        if isinstance(last_name, str):
-            self._last_name = last_name
-            self._full_name = None
-        else:
-            raise ValueError('Last name must be a string')
+    def last_name(self, name: str) -> None:
+        self._last_name = Account.validate_name(name, 'last name')
+        self._full_name = None
 
     @property
     def full_name(self):
@@ -125,3 +123,18 @@ class Account:
         id_num = int(confirmation.split('-')[-1])
 
         return Transaction(**transactions[id_num], tz=tz)
+
+    @staticmethod
+    def validate_name(value: str, field_name: str) -> str:
+        """Validate the first name and the last name of the account holder."""
+
+        if not isinstance(value, str):
+            raise ValueError(
+                f'{field_name.capitalize()} must be a string'
+            )
+        if len(value.strip()) == 0:
+            raise ValueError(
+                f'{field_name.capitalize()} can not be empty string.'
+            )
+
+        return value.strip()

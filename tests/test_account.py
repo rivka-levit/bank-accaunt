@@ -121,3 +121,13 @@ class TestAccount(TestCase):
         self.assertEqual(tsn.transaction_id, id_num)
         self.assertEqual(tsn.time, expected_time)
         self.assertEqual(tsn.time_utc, expected_time_utc)
+
+    def test_account_validation_names(self):
+        """Test the validation of the names in the account."""
+
+        with self.assertRaises(ValueError):
+            Account('123asfsadf', '   ', 'some', 'UTC')
+            Account('123as', 'some', '    ', 'UTC')
+            Account('123as', 987, '    ', 'UTC')
+            Account('123as', 'some', 567, 'UTC')
+            Account('123as', 567, 'UTC')
