@@ -37,6 +37,19 @@ class TestAccount(TestCase):
         self.assertEqual(self.account.balance, 0)
         self.assertEqual(self.account.interest_rate, 0.005)
 
+    def test_create_account_default_timezone(self):
+        """Test creating an account with default UTC timezone."""
+
+        account = Account(
+            number='123456AB',
+            first_name='John',
+            last_name='Dow'
+        )
+
+        expected_tz = TimeZone('UTC')
+
+        self.assertEqual(account.tz, expected_tz)
+
     @patch('account.next')
     def test_generate_confirmation_number(self, mocked_transaction_counter):
         """Test generating confirmation number of transaction."""

@@ -25,7 +25,8 @@ class Account:
                  last_name: str,
                  zone: str = None) -> None:
 
-        self.tz = TimeZone(zone=zone)
+        if zone is not None:
+            self.tz = TimeZone(zone=zone)
         self._account_number = number
         self._first_name = None
         self._last_name = None
