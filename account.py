@@ -17,12 +17,13 @@ class Account:
     """Account object"""
 
     transaction_counter = itertools.count(1)
+    _tz = TimeZone('UTC')
 
     def __init__(self,
                  number: str,
                  first_name: str,
                  last_name: str,
-                 zone: str) -> None:
+                 zone: str = None) -> None:
 
         self.tz = TimeZone(zone=zone)
         self._account_number = number
@@ -37,6 +38,16 @@ class Account:
     @property
     def account_number(self):
         return self._account_number
+
+    @property
+    def tz(self):
+        return self._tz
+
+    @tz.setter
+    def tz(self, time_zone: TimeZone) -> None:
+        if not isinstance(time_zone, TimeZone):
+            raise ValueError('Time Zone must be a valid TimeZone object.')
+        self._tz = time_zone
 
     @property
     def first_name(self):

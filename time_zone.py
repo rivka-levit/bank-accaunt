@@ -22,7 +22,7 @@ class TimeZone:
             raise ValueError('Timezone must be a string.')
         if len(str(zone).strip()) == 0:
             raise ValueError('Timezone name cannot be empty.')
-        if zone not in pytz.all_timezones:
+        if zone not in pytz.all_timezones_set:
             raise ValueError('No such a timezone.')
         self._name = zone
 
