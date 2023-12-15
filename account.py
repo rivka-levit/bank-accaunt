@@ -6,6 +6,7 @@ from datetime import datetime
 
 import pytz
 import itertools
+import numbers
 
 from time_zone import TimeZone
 from transactions import Transaction
@@ -18,6 +19,7 @@ class Account:
 
     transaction_counter = itertools.count(1)
     _tz = TimeZone('UTC')
+    _interest_rate = 0.005
 
     def __init__(self,
                  number: str,
@@ -35,7 +37,6 @@ class Account:
         self.last_name = last_name
         self._full_name = None
         self._balance = initial_balance
-        self._interest_rate = 0.005
 
     @property
     def account_number(self):
@@ -79,9 +80,17 @@ class Account:
     def balance(self):
         return self._balance
 
-    @property
-    def interest_rate(self):
-        return self._interest_rate
+    @classmethod
+    def get_interest_rate(cls):
+        return cls._interest_rate
+
+    @classmethod
+    def set_interest_rate(cls, value):
+        if not isinstance(value, numbers.Real):
+            raise ValueError('Interest rate must be a real number.')
+        if value < 0:
+            raise ValueError('Interest rate cannot be negative.')
+        cls._interest_rate = value
 
     def generate_conf_number(self, code: str, dt: datetime) -> str:
         """Generate confirmation number for every transaction."""
@@ -119,7 +128,7 @@ class Account:
     def pay_interest(self):
         """Deposit interest on the balance."""
 
-        interest = self._balance * self.interest_rate
+        interest = self._balance * self._interest_rate
         self.deposit(interest)
 
         return self.generate_conf_number('I', datetime.now())

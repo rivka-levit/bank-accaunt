@@ -35,7 +35,7 @@ class TestAccount(TestCase):
 
         self.assertEqual(self.account.tz.offset, offset)
         self.assertEqual(self.account.balance, 0)
-        self.assertEqual(self.account.interest_rate, 0.005)
+        self.assertEqual(self.account.get_interest_rate(), 0.005)
 
     def test_create_account_default_timezone(self):
         """Test creating an account with default UTC timezone."""
@@ -99,7 +99,7 @@ class TestAccount(TestCase):
 
         self.account.deposit(100)
 
-        expected = (self.account.interest_rate * self.account.balance +
+        expected = (self.account.get_interest_rate() * self.account.balance +
                     self.account.balance)
 
         confirmation = self.account.pay_interest()
