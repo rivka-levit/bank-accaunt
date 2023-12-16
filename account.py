@@ -20,6 +20,12 @@ class Account:
     transaction_counter = itertools.count(1)
     _tz = TimeZone('UTC')
     _interest_rate = 0.005
+    _transaction_codes = {
+        'deposit': 'D',
+        'withdraw': 'W',
+        'interest': 'I',
+        'rejected': 'X'
+    }
 
     def __init__(self,
                  number: str,
@@ -120,18 +126,21 @@ class Account:
         new_balance = self._balance - amount
 
         if new_balance < 0:
-            return self.generate_conf_number('X', datetime.now(tz=pytz.utc))
+            code = self._transaction_codes['rejected']
+            return self.generate_conf_number(code, datetime.now(tz=pytz.utc))
 
         self._balance -= amount
-        return self.generate_conf_number('W', datetime.now(tz=pytz.utc))
+        code = self._transaction_codes['withdraw']
+        return self.generate_conf_number(code, datetime.now(tz=pytz.utc))
 
     def pay_interest(self):
         """Deposit interest on the balance."""
 
         interest = self._balance * self._interest_rate
         self.deposit(interest)
+        code = self._transaction_codes['interest']
 
-        return self.generate_conf_number('I', datetime.now())
+        return self.generate_conf_number(code, datetime.now())
 
     @staticmethod
     def get_transaction(confirmation: str, tz: str) -> Transaction:
