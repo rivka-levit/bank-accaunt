@@ -3,6 +3,7 @@ Bank Account class
 """
 
 from datetime import datetime
+from collections import namedtuple  # noqa
 
 import pytz
 import itertools
@@ -170,3 +171,39 @@ class Account:
             )
 
         return value.strip()
+
+    # @staticmethod
+    # def parse_confirmation_code(confirmation_code: str, tz=None):
+    #     """Parse confirmation code."""
+    #
+    #     Confirmation = namedtuple(
+    #         'Confirmation',
+    #         'account_number transaction_code transaction_id time_utc time'
+    #     )
+    #
+    #     parts = confirmation_code.split('-')
+    #     if len(parts) != 4:
+    #         raise ValueError('Invalid confirmation code!')
+    #
+    #     code, acc_num, dt_raw_utc, id_num = parts
+    #
+    #     try:
+    #         dt = (datetime.strptime(dt_raw_utc, '%Y%m%d%H%M%S').
+    #               astimezone(pytz.timezone('UTC')))
+    #     except ValueError as ex:
+    #         raise ValueError('Invalid transaction datetime!') from ex
+    #
+    #     if tz is None:
+    #         tz = TimeZone('UTC')
+    #
+    #     if not isinstance(tz, TimeZone):
+    #         raise ValueError('Invalid timezone specified!')
+    #
+    #     dt_format = '%Y-%m-%d %H:%M:%S (%Z)'
+    #
+    #     dt_preferred = dt.astimezone(pytz.timezone(tz.name))
+    #
+    #     dt_str = dt.strftime(dt_format)
+    #     dt_preferred_str = dt_preferred.strftime(dt_format)
+    #
+    #     return Confirmation(acc_num, code, id_num, dt_str, dt_preferred_str)
