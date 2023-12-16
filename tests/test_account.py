@@ -50,14 +50,13 @@ class TestAccount(TestCase):
 
         self.assertEqual(account.tz, expected_tz)
 
-    @patch('account.next')
-    def test_generate_confirmation_number(self, mocked_transaction_counter):
+    def test_generate_confirmation_number(self):
         """Test generating confirmation number of transaction."""
 
         dt = datetime.now()
-        mocked_transaction_counter.return_value = 5
         payload = {
-            'code': 'D',
+            'code': self.account._transaction_codes['deposit'],
+            'id_num': 5,
             'dt': dt
         }
 
@@ -67,15 +66,19 @@ class TestAccount(TestCase):
 
         self.assertEqual(confirmation, expected)
 
-    def test_deposit_on_account(self):
+    @patch('account.next')
+    def test_deposit_on_account(self, mocked_transaction_counter):
         """Test deposit amount on the account's balance."""
 
+        mocked_transaction_counter.return_value = 5
         current_balance = self.account.balance
         amount = 10.5
 
-        self.account.deposit(amount)
+        confirmation = self.account.deposit(amount)
+        id_num = int(confirmation.split('-')[-1])
 
         self.assertEqual(self.account.balance, current_balance + amount)
+        self.assertEqual(id_num, 5)
 
     def test_withdrawal_from_account_success(self):
         """Test withdrawal amount from the account's balance."""

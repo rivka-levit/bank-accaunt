@@ -98,11 +98,10 @@ class Account:
             raise ValueError('Interest rate cannot be negative.')
         cls._interest_rate = value
 
-    def generate_conf_number(self, code: str, dt: datetime) -> str:
+    def generate_conf_number(self, code: str, id_num: int, dt: datetime) -> str:
         """Generate confirmation number for every transaction."""
 
         dt_stamp = dt.strftime('%Y%m%d%H%M%S')
-        id_num = next(Account.transaction_counter)
         transactions[id_num] = {
             'id_num': id_num,
             'code': code,
@@ -117,30 +116,37 @@ class Account:
 
         self._balance += amount
         dt = datetime.now(tz=pytz.utc)
+        id_num = next(Account.transaction_counter)
+        code = self._transaction_codes['deposit']
 
-        return self.generate_conf_number('D', dt)
+        return self.generate_conf_number(code, id_num, dt)
 
     def withdraw(self, amount: float) -> str:
         """Withdraw amount from the balance."""
 
         new_balance = self._balance - amount
+        dt = datetime.now(tz=pytz.utc)
+        id_num = next(Account.transaction_counter)
 
         if new_balance < 0:
             code = self._transaction_codes['rejected']
-            return self.generate_conf_number(code, datetime.now(tz=pytz.utc))
+            return self.generate_conf_number(code, id_num, dt)
 
         self._balance -= amount
         code = self._transaction_codes['withdraw']
-        return self.generate_conf_number(code, datetime.now(tz=pytz.utc))
+        return self.generate_conf_number(code, id_num, dt)
 
     def pay_interest(self):
         """Deposit interest on the balance."""
 
         interest = self._balance * self._interest_rate
-        self.deposit(interest)
+        self._balance += interest
+
+        dt = datetime.now(tz=pytz.utc)
+        id_num = next(Account.transaction_counter)
         code = self._transaction_codes['interest']
 
-        return self.generate_conf_number(code, datetime.now())
+        return self.generate_conf_number(code, id_num, dt)
 
     @staticmethod
     def get_transaction(confirmation: str, tz: str) -> Transaction:
