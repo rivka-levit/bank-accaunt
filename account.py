@@ -115,39 +115,49 @@ class Account:
     def deposit(self, amount: float) -> str:
         """Deposit amount on the balance."""
 
-        self._balance += amount
+        amount = Account.validate_payment_amount(amount, min_value=0.01)
+
         dt = datetime.now(tz=pytz.utc)
         id_num = next(Account.transaction_counter)
-        code = self._transaction_codes['deposit']
+        code = Account._transaction_codes['deposit']
+        confirmation = self.generate_conf_number(code, id_num, dt)
 
-        return self.generate_conf_number(code, id_num, dt)
+        self._balance += amount
 
-    def withdraw(self, amount: float) -> str:
+        return confirmation
+
+    def withdraw(self, amount: numbers.Real) -> str:
         """Withdraw amount from the balance."""
 
-        new_balance = self._balance - amount
-        dt = datetime.now(tz=pytz.utc)
-        id_num = next(Account.transaction_counter)
+        amount = Account.validate_payment_amount(amount, min_value=0.01)
 
-        if new_balance < 0:
-            code = self._transaction_codes['rejected']
+        id_num = next(Account.transaction_counter)
+        dt = datetime.now(tz=pytz.utc)
+
+        if self._balance - amount < 0:
+            code = Account._transaction_codes['rejected']
             return self.generate_conf_number(code, id_num, dt)
 
+        code = Account._transaction_codes['withdraw']
+        confirmation = self.generate_conf_number(code, id_num, dt)
+
         self._balance -= amount
-        code = self._transaction_codes['withdraw']
-        return self.generate_conf_number(code, id_num, dt)
+
+        return confirmation
 
     def pay_interest(self):
         """Deposit interest on the balance."""
 
-        interest = self._balance * self._interest_rate
-        self._balance += interest
+        interest = self._balance * Account._interest_rate
 
         dt = datetime.now(tz=pytz.utc)
         id_num = next(Account.transaction_counter)
-        code = self._transaction_codes['interest']
+        code = Account._transaction_codes['interest']
 
-        return self.generate_conf_number(code, id_num, dt)
+        confirmation = self.generate_conf_number(code, id_num, dt)
+        self._balance += interest
+
+        return confirmation
 
     @staticmethod
     def get_transaction(confirmation: str, tz: str) -> Transaction:
@@ -171,6 +181,22 @@ class Account:
             )
 
         return value.strip()
+
+    @staticmethod
+    def validate_payment_amount(value: numbers.Real,
+                                min_value: numbers.Real = 0):
+        """Validate the amount passed to a payment method."""
+
+        if not isinstance(value, numbers.Real):
+            raise ValueError('The amount must be a real number.')
+
+        if min_value is not None and value < min_value:
+            raise ValueError(f'The amount must be at least {min_value}.')
+
+        if value <= 0:
+            raise ValueError('Deposit amount must be a positive number.')
+
+        return value
 
     # @staticmethod
     # def parse_confirmation_code(confirmation_code: str, tz=None):
