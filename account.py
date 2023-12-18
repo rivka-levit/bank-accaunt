@@ -32,7 +32,7 @@ class Account:
                  number: str,
                  first_name: str,
                  last_name: str,
-                 initial_balance: float = 0,
+                 initial_balance: numbers.Real = 0,
                  zone: str = None) -> None:
 
         if zone is not None:
@@ -43,7 +43,8 @@ class Account:
         self.first_name = first_name
         self.last_name = last_name
         self._full_name = None
-        self._balance = initial_balance
+        self._balance = Account.validate_initial_balance(initial_balance,
+                                                         min_value=0)
 
     @property
     def account_number(self):
@@ -115,7 +116,7 @@ class Account:
     def deposit(self, amount: float) -> str:
         """Deposit amount on the balance."""
 
-        amount = Account.validate_payment_amount(amount, min_value=0.01)
+        amount = Account.validate_real_number(amount, min_value=0.01)
 
         dt = datetime.now(tz=pytz.utc)
         id_num = next(Account.transaction_counter)
@@ -129,7 +130,7 @@ class Account:
     def withdraw(self, amount: numbers.Real) -> str:
         """Withdraw amount from the balance."""
 
-        amount = Account.validate_payment_amount(amount, min_value=0.01)
+        amount = Account.validate_real_number(amount, min_value=0.01)
 
         id_num = next(Account.transaction_counter)
         dt = datetime.now(tz=pytz.utc)
@@ -183,18 +184,30 @@ class Account:
         return value.strip()
 
     @staticmethod
-    def validate_payment_amount(value: numbers.Real,
-                                min_value: numbers.Real = 0):
-        """Validate the amount passed to a payment method."""
+    def validate_initial_balance(value: numbers.Real,
+                                 min_value: numbers.Real) -> numbers.Real:
+        """Validate the initial balance of the account holder."""
 
         if not isinstance(value, numbers.Real):
-            raise ValueError('The amount must be a real number.')
+            raise ValueError('The value must be a real number.')
 
         if min_value is not None and value < min_value:
-            raise ValueError(f'The amount must be at least {min_value}.')
+            raise ValueError(f'The value must be at least {min_value}.')
 
-        if value <= 0:
-            raise ValueError('Deposit amount must be a positive number.')
+        if value < 0:
+            raise ValueError('The value must be a positive number.')
+
+        return value
+
+    @staticmethod
+    def validate_real_number(value: numbers.Real,
+                             min_value: numbers.Real = 0):
+        """Validate the amount passed to a payment method."""
+
+        value = Account.validate_initial_balance(value, min_value)
+
+        if value == 0:
+            raise ValueError('The value can not be 0.')
 
         return value
 

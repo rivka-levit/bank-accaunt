@@ -2,9 +2,8 @@
 Tests for time zone class
 """
 from unittest import TestCase
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-import pytz
 from time_zone import TimeZone
 
 

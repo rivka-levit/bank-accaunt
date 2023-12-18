@@ -12,16 +12,25 @@ from account import Account
 from time_zone import TimeZone
 
 
+def create_account(**params):
+    """Create an account with the given parameters."""
+
+    defaults = {
+        'number': '123456',
+        'first_name': 'Name',
+        'last_name': 'Surname',
+        'zone': 'Asia/Jerusalem'
+    }
+    defaults.update(**params)
+
+    return Account(**defaults)
+
+
 class TestAccount(TestCase):
     """Test account class."""
 
     def setUp(self):
-        self.account = Account(
-            number='123456',
-            first_name='Name',
-            last_name='Surname',
-            zone='Asia/Jerusalem'
-        )
+        self.account = create_account()
 
     def test_account_init(self):
         """Test account initialization."""
@@ -36,6 +45,16 @@ class TestAccount(TestCase):
         self.assertEqual(self.account.tz.offset, offset)
         self.assertEqual(self.account.balance, 0)
         self.assertEqual(self.account.get_interest_rate(), 0.005)
+
+    def test_invalid_names_error(self):
+        """Test invalid first name and last name raises ValueError."""
+
+        test_cases = [{'first_name': ''}, {'first_name': 5}, {'last_name': ''},
+                      {'last_name': 7}, {'first_name': '   '}]
+
+        with self.assertRaises(ValueError):
+            for i in test_cases:
+                create_account(**i)
 
     def test_create_account_default_timezone(self):
         """Test creating an account with default UTC timezone."""
