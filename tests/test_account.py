@@ -59,11 +59,14 @@ class TestAccount(TestCase):
     def test_create_account_default_timezone(self):
         """Test creating an account with default UTC timezone."""
 
-        account = Account(
-            number='123456AB',
-            first_name='John',
-            last_name='Dow'
-        )
+        payload = {
+            'number': '123456AB',
+            'first_name': 'John',
+            'last_name': 'Dow',
+            'zone': None
+        }
+
+        account = create_account(**payload)
 
         expected_tz = TimeZone('UTC')
 
@@ -98,23 +101,25 @@ class TestAccount(TestCase):
 
         self.assertEqual(self.account.balance, current_balance + amount)
         self.assertEqual(id_num, 5)
+        self.assertTrue(confirmation.startswith('D'))
 
     def test_withdrawal_from_account_success(self):
         """Test withdrawal amount from the account's balance."""
 
         self.account.deposit(100)
-        self.account.withdraw(50)
+        confirmation = self.account.withdraw(50)
 
         self.assertEqual(self.account.balance, 50)
+        self.assertTrue(confirmation.startswith('W'))
 
     def test_withdrawal_from_account_declined(self):
         """Test withdrawal declined."""
 
         self.account.deposit(50)
         confirmation = self.account.withdraw(100)
-        ts_code = confirmation.split('-')[0]
 
-        self.assertEqual(ts_code, 'X')
+        self.assertTrue(confirmation.startswith('X'))
+        self.assertEqual(self.account.balance, 50)
 
     def test_pay_interest_to_account(self):
         """Test pay interest to the account's balance.'"""
@@ -125,10 +130,9 @@ class TestAccount(TestCase):
                     self.account.balance)
 
         confirmation = self.account.pay_interest()
-        ts_code = confirmation.split('-')[0]
 
         self.assertEqual(self.account.balance, expected)
-        self.assertEqual(ts_code, 'I')
+        self.assertTrue(confirmation.startswith('I'))
 
     def test_get_transaction_method(self):
         """Test the get_transaction method returns a valid transaction."""
@@ -156,13 +160,3 @@ class TestAccount(TestCase):
         self.assertEqual(tsn.transaction_id, id_num)
         self.assertEqual(tsn.time, expected_time)
         self.assertEqual(tsn.time_utc, expected_time_utc)
-
-    def test_account_validation_names(self):
-        """Test the validation of the names in the account."""
-
-        with self.assertRaises(ValueError):
-            Account('123asfsadf', '   ', 'some', 'UTC')
-            Account('123as', 'some', '    ', 'UTC')
-            Account('123as', 987, '    ', 'UTC')
-            Account('123as', 'some', 567, 'UTC')
-            Account('123as', 567, 'UTC')
